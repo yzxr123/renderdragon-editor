@@ -4,7 +4,7 @@ import functools, http.server, json, os, threading
 from playwright.sync_api import sync_playwright
 
 PROJECT = Path(__file__).resolve().parents[1]
-ROOT = PROJECT/'_site' if os.environ.get('EDITOR_TEST_SITE') else PROJECT
+ROOT = PROJECT/'website'
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -23,7 +23,7 @@ def run():
             page.on('pageerror', lambda error:errors.append(str(error)))
             page.goto(f'http://127.0.0.1:{server.server_port}')
             page.wait_for_function('window.RenderDragonApp?.state?.open', timeout=60000)
-            if os.environ.get('EDITOR_TEST_SITE'):
+            if True:
                 assert not any('template.tar.gz' in url for url in requests), 'startup must not fetch texture bytes'
                 assert page.locator('#startupStatus').count()==0
                 page.route('**/assets/template.tar.gz',lambda route:route.abort())
@@ -36,6 +36,16 @@ def run():
                 page.locator('[data-tab="pbr"]').click()
                 page.locator('#openPainterBtn').click()
             page.wait_for_function('document.querySelector("#painterFrame").contentWindow.RenderDragonPaint', timeout=30000)
+            painter_styles=page.evaluate('''()=>{const frame=document.querySelector('#painterFrame').contentDocument;return {sheets:frame.styleSheets.length,appDisplay:frame.defaultView.getComputedStyle(frame.querySelector('.app')).display,titleDisplay:frame.defaultView.getComputedStyle(frame.querySelector('.titlebar')).display,overflow:frame.defaultView.getComputedStyle(frame.body).overflow};}''')
+            assert painter_styles['sheets']>0, painter_styles
+            assert painter_styles['appDisplay']=='flex', painter_styles
+            assert painter_styles['titleDisplay']=='flex', painter_styles
+            assert painter_styles['overflow'] in ['auto','hidden'], painter_styles
+            if os.environ.get('EDITOR_SCREENSHOT'):
+                if not page.locator('#painterOverlay').is_visible():
+                    page.locator('[data-tab="pbr"]').click()
+                    page.locator('#openPainterBtn').click()
+                page.screenshot(path=os.environ['EDITOR_SCREENSHOT'])
             assert page.evaluate('RenderDragonApp.state.biomes.length') == 87
             if page.locator('#painterOverlay').is_visible():
                 page.locator('#closePainterBtn').click()

@@ -4,7 +4,7 @@
 
 主页面加载颜色协议、schema、文件系统、材质注册表和工作区，再初始化参数编辑器与 iframe 画板。`RenderDragonBridge` 连接两个界面；画板使用同源父页面 API，不向外部服务发送图像。
 
-`seed-data.js` 包含群系与参数默认值；`data/template/` 提供贴图源文件。构建脚本生成 gzip + TAR + Base64 的模板包，并将共享颜色模块、画板 CSS 与脚本内联到 `srcdoc` 文档，从而保留离线运行方式。源码保留在独立文件中，避免维护转义的大字符串。
+`website/assets/seed-data.js` 包含群系与参数默认值；`data/template/` 提供贴图源文件。构建脚本生成 gzip + TAR + Base64 的模板包，并将共享颜色模块、画板 CSS 与脚本内联到 `srcdoc` 文档，从而保留离线运行方式。源码保留在独立文件中，避免维护转义的大字符串。构建直接更新完整 `website/`；网络访问按需下载 gzip 贴图库，本地文件访问按需加载内嵌素材脚本，二者使用同一页面。
 
 ## 写时复制与最小导出
 
@@ -16,7 +16,7 @@ JSON 比较忽略缩进和属性顺序；与基线相同的修改会被撤销。
 
 ## PBR 估计流程
 
-实现见 `assets/pbr-algorithm.js`，入口为 `generate` 与 `generateChannel`。
+实现见 `website/assets/pbr-algorithm.js`，入口为 `generate` 与 `generateChannel`。
 
 1. 按目标分辨率准备源图像，缩小时在 alpha 加权后平均颜色，避免透明边缘引入黑边。
 2. 以 `0.2126R + 0.7152G + 0.0722B` 计算亮度，统计饱和度、亮度方差、梯度与局部变化。

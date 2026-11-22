@@ -25,7 +25,7 @@ for (const file of [
   "fs-core",
 ])
   vm.runInThisContext(
-    readFileSync(new URL("../assets/" + file + ".js", import.meta.url), "utf8"),
+    readFileSync(new URL("../website/assets/" + file + ".js", import.meta.url), "utf8"),
     { filename: file },
   );
 const gray = (value, w = 2, h = 2) =>

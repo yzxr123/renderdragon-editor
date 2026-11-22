@@ -25,14 +25,10 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - run: python -m playwright install --with-deps chromium
       - run: python tests/browser.py
-      - run: python scripts/site.py
-      - run: python tests/browser.py
-        env:
-          EDITOR_TEST_SITE: "1"
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:
-          path: _site
+          path: website
   deploy:
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     needs: test

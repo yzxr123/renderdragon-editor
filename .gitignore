@@ -1,5 +1,3 @@
-assets/template-bundle.js
-assets/painter-doc.js
 _site/
 node_modules/
 __pycache__/

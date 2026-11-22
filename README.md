@@ -52,7 +52,7 @@ python tests/browser.py
 | `tests/` | 算法与浏览器回归测试 |
 | `docs/` | 架构、算法、审计与发布说明 |
 
-`assets/template-bundle.js` 和 `assets/painter-doc.js` 是构建产物，不提交 Git；修改源文件后重新构建。GitHub Pages 工作流会自动构建并测试，仅部署网页运行文件。
+`assets/template-bundle.js` 和 `assets/painter-doc.js` 是构建产物，不提交 Git；修改源文件后重新构建。GitHub Pages 工作流会自动构建并测试。在线版内联启动代码与样式，先打开参数界面，读取具体材质时才下载贴图库；离线版仍自带完整素材。
 
 ## 许可与来源
 

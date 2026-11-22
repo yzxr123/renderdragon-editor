@@ -3,7 +3,8 @@ from pathlib import Path
 import functools, http.server, json, os, threading
 from playwright.sync_api import sync_playwright
 
-ROOT = Path(__file__).resolve().parents[1]
+PROJECT = Path(__file__).resolve().parents[1]
+ROOT = PROJECT/'_site' if os.environ.get('EDITOR_TEST_SITE') else PROJECT
 class QuietHandler(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *args):
         pass
@@ -17,11 +18,27 @@ def run():
             edge = Path('C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe')
             browser = playwright.chromium.launch(headless=True, **({'executable_path':str(edge)} if edge.exists() else {}))
             page = browser.new_page(viewport={'width':1440,'height':900})
+            requests=[]
+            page.on('request',lambda request:requests.append(request.url))
             page.on('pageerror', lambda error:errors.append(str(error)))
             page.goto(f'http://127.0.0.1:{server.server_port}')
             page.wait_for_function('window.RenderDragonApp?.state?.open', timeout=60000)
+            if os.environ.get('EDITOR_TEST_SITE'):
+                assert not any('template.tar.gz' in url for url in requests), 'startup must not fetch texture bytes'
+                assert page.locator('#startupStatus').count()==0
+                page.route('**/assets/template.tar.gz',lambda route:route.abort())
+                failure=page.evaluate('async()=>{try{await RenderDragonCore.readBytes(RenderDragonWorkspace.root,"textures/blocks/stone.png");return "unexpected success";}catch(error){return error.message;}}')
+                assert '贴图库加载失败' in failure
+                page.unroute('**/assets/template.tar.gz')
+                image=page.evaluate('async()=>{const bytes=await RenderDragonCore.readBytes(RenderDragonWorkspace.root,"textures/blocks/stone.png");return {size:bytes.length,signature:[...bytes.slice(0,4)]};}')
+                assert image['signature']==[137,80,78,71]
+                assert page.evaluate('RenderDragonApp.state.open')
+                page.locator('[data-tab="pbr"]').click()
+                page.locator('#openPainterBtn').click()
             page.wait_for_function('document.querySelector("#painterFrame").contentWindow.RenderDragonPaint', timeout=30000)
             assert page.evaluate('RenderDragonApp.state.biomes.length') == 87
+            if page.locator('#painterOverlay').is_visible():
+                page.locator('#closePainterBtn').click()
             # Every category renders without a runtime error.
             for button in page.locator('#tabs button').all():
                 button.click()

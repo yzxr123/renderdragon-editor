@@ -26,6 +26,9 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: python tests/browser.py
       - run: python scripts/site.py
+      - run: python tests/browser.py
+        env:
+          EDITOR_TEST_SITE: "1"
       - uses: actions/upload-pages-artifact@v3
         if: github.event_name != 'pull_request'
         with:

@@ -1670,6 +1670,7 @@
       return;
     const d = await api("open");
     if (d.ok) {
+      document.getElementById("startupStatus")?.remove();
       loadState(d);
       await preparePainter(true);
     }
@@ -2122,10 +2123,12 @@
     const d = await api("bootstrap");
     busy = false;
     if (d.ok) {
+      document.getElementById("startupStatus")?.remove();
       loadState(d);
-      preparePainter().catch((error) =>
-        toast("材质窗口初始化失败 " + error.message, true),
-      );
+      if (!window.RenderDragonTemplateCatalog)
+        preparePainter().catch((error) =>
+          toast("材质窗口初始化失败 " + error.message, true),
+        );
     } else {
       $("#editor").innerHTML =
         '<div class="missing-card">内置资源准备失败  ' +

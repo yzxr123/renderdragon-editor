@@ -312,11 +312,22 @@
     if (catalogPromise) return catalogPromise;
     catalogPromise = (async () => {
       const root = new core.MemoryDirectoryHandle("RenderDragon_Catalog");
-      const entries = core.tarEntries(await core.decompressTemplate());
+      const lazyCatalog = global.RenderDragonTemplateCatalog;
+      const entries = lazyCatalog
+        ? lazyCatalog.paths.map((path) => ({ path }))
+        : core.tarEntries(await core.decompressTemplate());
       // 预置图像是可选素材  不能把预制 Texture Set 注册到用户的资源包
       for (const entry of entries) {
         if (entry.path.endsWith(".texture_set.json")) continue;
-        await core.writeBytes(root, pathName(entry.path), entry.data);
+        if (lazyCatalog) {
+          const handle = await core.getFileHandle(
+            root,
+            pathName(entry.path),
+            true,
+          );
+          handle.getFile = async () =>
+            new File([await lazyCatalog.read(entry.path)], handle.name);
+        } else await core.writeBytes(root, pathName(entry.path), entry.data);
       }
       const model = core.createFrameworkModel("renderdragon");
       for (const [cat, doc] of Object.entries(model.categories))

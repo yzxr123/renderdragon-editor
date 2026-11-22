@@ -23,18 +23,17 @@ def run():
             page.on('pageerror', lambda error:errors.append(str(error)))
             page.goto(f'http://127.0.0.1:{server.server_port}')
             page.wait_for_function('window.RenderDragonApp?.state?.open', timeout=60000)
-            if True:
-                assert not any('template.tar.gz' in url for url in requests), 'startup must not fetch texture bytes'
-                assert page.locator('#startupStatus').count()==0
-                page.route('**/assets/template.tar.gz',lambda route:route.abort())
-                failure=page.evaluate('async()=>{try{await RenderDragonCore.readBytes(RenderDragonWorkspace.root,"textures/blocks/stone.png");return "unexpected success";}catch(error){return error.message;}}')
-                assert '贴图库加载失败' in failure
-                page.unroute('**/assets/template.tar.gz')
-                image=page.evaluate('async()=>{const bytes=await RenderDragonCore.readBytes(RenderDragonWorkspace.root,"textures/blocks/stone.png");return {size:bytes.length,signature:[...bytes.slice(0,4)]};}')
-                assert image['signature']==[137,80,78,71]
-                assert page.evaluate('RenderDragonApp.state.open')
-                page.locator('[data-tab="pbr"]').click()
-                page.locator('#openPainterBtn').click()
+            assert not any('template.tar.gz' in url for url in requests), 'startup must not fetch texture bytes'
+            assert page.locator('#startupStatus').count()==0
+            page.route('**/assets/template.tar.gz',lambda route:route.abort())
+            failure=page.evaluate('async()=>{try{await RenderDragonCore.readBytes(RenderDragonWorkspace.root,"textures/blocks/stone.png");return "unexpected success";}catch(error){return error.message;}}')
+            assert '贴图库加载失败' in failure
+            page.unroute('**/assets/template.tar.gz')
+            image=page.evaluate('async()=>{const bytes=await RenderDragonCore.readBytes(RenderDragonWorkspace.root,"textures/blocks/stone.png");return {size:bytes.length,signature:[...bytes.slice(0,4)]};}')
+            assert image['signature']==[137,80,78,71]
+            assert page.evaluate('RenderDragonApp.state.open')
+            page.locator('[data-tab="pbr"]').click()
+            page.locator('#openPainterBtn').click()
             page.wait_for_function('document.querySelector("#painterFrame").contentWindow.RenderDragonPaint', timeout=30000)
             painter_styles=page.evaluate('''()=>{const frame=document.querySelector('#painterFrame').contentDocument;return {sheets:frame.styleSheets.length,appDisplay:frame.defaultView.getComputedStyle(frame.querySelector('.app')).display,titleDisplay:frame.defaultView.getComputedStyle(frame.querySelector('.titlebar')).display,overflow:frame.defaultView.getComputedStyle(frame.body).overflow};}''')
             assert painter_styles['sheets']>0, painter_styles

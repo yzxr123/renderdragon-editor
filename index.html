@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1,viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="dark light" />
+    <link rel="icon" href="data:," />
+    <title>RenderDragon 资源包编辑器</title>
+    <meta name="rd-editor-version" content="1.0.0" />
+    <link rel="stylesheet" href="assets/app.css?v=1.0.0" />
+  </head>
+  <body>
+    <header class="commandbar" data-layout-scope="topbar">
+      <div class="brand-lockup" data-layout-key="topbar:brand">
+        <div class="brandmark" aria-hidden="true">RD</div>
+        <div class="brandcopy">
+          <strong>渲染龙光影编辑器</strong>
+          <span id="packMetaTop">未打开资源包</span>
+        </div>
+      </div>
+
+      <label class="target-choice" for="textureTarget"
+        >导出目标
+        <select id="textureTarget" data-target-select aria-label="导出目标">
+          <option value="opengl">OpenGL / FIO</option>
+          <option value="renderdragon" selected>渲染龙专用</option>
+        </select></label
+      >
+      <div
+        class="command-actions primary-actions"
+        data-layout-key="topbar:primary"
+        aria-label="资源包操作"
+      >
+        <button class="cmd primary" id="openBtn" type="button">
+          导入资源包
+        </button>
+        <button class="cmd" id="createBtn" type="button">新建工作区</button>
+        <button class="cmd" id="saveDraftBtn" type="button" disabled>
+          暂存修改
+        </button>
+        <button class="cmd" id="previewExportBtn" type="button" disabled>
+          下载清单
+        </button>
+        <button class="cmd save" id="writebackBtn" type="button" disabled>
+          下载修改包
+        </button>
+      </div>
+
+      <div
+        class="command-actions utility-actions"
+        data-layout-key="topbar:utility"
+        aria-label="工作区操作"
+      >
+        <button class="cmd" id="restoreBtn" type="button" disabled>恢复</button>
+        <button class="cmd" id="copyBtn" type="button" disabled>
+          复制 JSON
+        </button>
+        <button class="cmd" id="themeBtn" type="button">明暗主题</button>
+        <button class="cmd" id="appearanceBtn" type="button">界面配色</button>
+        <button
+          class="cmd"
+          id="layoutEditBtn"
+          type="button"
+          aria-pressed="false"
+        >
+          调整布局
+        </button>
+        <button class="cmd subtle" id="layoutResetBtn" type="button">
+          布局复位
+        </button>
+      </div>
+    </header>
+
+    <div class="workspace" data-layout-scope="main">
+      <aside class="rail biome-rail dock-panel" data-layout-key="main:biomes">
+        <div class="dock-heading rail-head" data-layout-key="biome:head">
+          <div class="dock-title">
+            <strong>群系</strong
+            ><span id="biomeCounter" class="count-badge">0</span>
+          </div>
+          <span id="dirtyBadge" class="dirty-badge" hidden>未保存</span>
+        </div>
+        <div class="rail-tools" data-layout-key="biome:tools">
+          <div class="segmented" role="group" aria-label="群系筛选">
+            <button class="seg active" id="biomeCurrentBtn" type="button">
+              当前
+            </button>
+            <button class="seg" id="biomeSelectedBtn" type="button">
+              勾选
+            </button>
+            <button class="seg" id="biomeAllBtn" type="button">全部</button>
+          </div>
+          <label class="field-label" for="biomeSearch">搜索群系</label>
+          <input
+            id="biomeSearch"
+            class="searchbox"
+            type="search"
+            placeholder="中文名、英文名或 ID"
+            autocomplete="off"
+          />
+        </div>
+        <div
+          id="biomeList"
+          class="biome-list scrollarea"
+          data-layout-key="biome:list"
+        ></div>
+      </aside>
+
+      <main class="editor-shell dock-panel" data-layout-key="main:editor">
+        <nav id="tabs" class="category-tabs" aria-label="光影参数分类"></nav>
+        <div class="editor-toolbar" data-layout-key="editor:toolbar">
+          <div class="field-search-wrap">
+            <label for="fieldSearch">搜索参数</label>
+            <input
+              id="fieldSearch"
+              type="search"
+              placeholder="名称、说明或 JSON 路径"
+              autocomplete="off"
+            />
+          </div>
+          <span id="fieldCount" class="field-count">0 条</span>
+          <div id="statusbar" class="mini-status" aria-label="资源状态"></div>
+        </div>
+        <section
+          id="editor"
+          class="editor-content scrollarea"
+          data-layout-key="editor:content"
+        ></section>
+      </main>
+
+      <aside class="inspector dock-panel" data-layout-key="main:inspector">
+        <div class="dock-heading inspector-heading">
+          <div class="dock-title">
+            <strong>检查器</strong><span>当前上下文</span>
+          </div>
+        </div>
+        <nav class="inspector-tabs" aria-label="检查器分类">
+          <button
+            class="inspector-tab active"
+            type="button"
+            data-inspector-tab="help"
+          >
+            说明
+          </button>
+          <button
+            class="inspector-tab"
+            type="button"
+            data-inspector-tab="status"
+          >
+            状态
+          </button>
+          <button
+            class="inspector-tab"
+            type="button"
+            data-inspector-tab="recipes"
+          >
+            配方
+          </button>
+          <button class="inspector-tab" type="button" data-inspector-tab="io">
+            导入导出
+          </button>
+          <button
+            class="inspector-tab"
+            type="button"
+            data-inspector-tab="appearance"
+          >
+            配色
+          </button>
+        </nav>
+        <div class="inspector-body scrollarea">
+          <section
+            class="inspector-view active help-section"
+            data-inspector-view="help"
+            data-layout-key="inspector:help"
+          >
+            <h2 id="fieldHelpTitle">选择一个参数</h2>
+            <p id="fieldHelpText">
+              点击滑条、数字框、颜色或选项后，这里显示对应 JSON
+              路径、范围和写入方式
+            </p>
+            <div class="path-block">
+              <span>JSON 路径</span><code id="fieldHelpPath">未选择</code>
+            </div>
+          </section>
+
+          <section
+            class="inspector-view"
+            data-inspector-view="status"
+            data-layout-key="inspector:status"
+          >
+            <div class="section-heading-row"><h2>当前状态</h2></div>
+            <div id="chips" class="metric-grid"></div>
+          </section>
+
+          <section
+            class="inspector-view recipe-section"
+            data-inspector-view="recipes"
+            data-layout-key="inspector:recipes"
+          >
+            <div class="section-heading-row">
+              <h2>参考参数</h2>
+              <button class="text-btn" id="saveRecipeBtn" type="button">
+                保存当前
+              </button>
+            </div>
+            <div id="recipes" class="recipe-list"></div>
+          </section>
+
+          <section
+            class="inspector-view io-section"
+            data-inspector-view="io"
+            data-layout-key="inspector:fogio"
+          >
+            <h2>光影参数修改项</h2>
+            <p>修改项只记录与基准不同的字段</p>
+            <div class="button-stack">
+              <button class="secondary-btn" id="importFogBtn" type="button">
+                导入修改项 JSON
+              </button>
+              <button class="secondary-btn" id="exportFogBtn" type="button">
+                导出参数修改项
+              </button>
+            </div>
+            <input
+              type="file"
+              id="fogFile"
+              accept=".json,application/json"
+              hidden
+            />
+          </section>
+
+          <section
+            id="appearancePanel"
+            class="inspector-view appearance-panel"
+            data-inspector-view="appearance"
+            data-layout-key="inspector:appearance"
+            aria-label="界面配色编辑器"
+          >
+            <div class="appearance-head">
+              <div>
+                <h2>界面配色</h2>
+                <p>每次修改都会立即应用到主页面和 PBR 编辑器</p>
+              </div>
+              <button class="text-btn" id="appearanceCloseBtn" type="button">
+                返回说明
+              </button>
+            </div>
+            <div class="appearance-mode">
+              <span id="appearanceModeLabel">深色主题</span>
+              <button
+                class="secondary-btn"
+                id="appearanceToggleModeBtn"
+                type="button"
+              >
+                切换明暗主题
+              </button>
+            </div>
+            <div class="theme-preview" aria-hidden="true">
+              <div class="theme-preview-bar"></div>
+              <div class="theme-preview-body">
+                <span></span><span></span><b></b>
+              </div>
+            </div>
+            <div class="appearance-live" aria-label="实时颜色微调">
+              <div class="appearance-live-head">
+                <div>
+                  <span>正在编辑</span>
+                  <strong id="appearanceSelectedTitle">主操作色</strong>
+                </div>
+                <div class="appearance-live-value">
+                  <i id="appearanceSelectedSwatch"></i>
+                  <code id="appearanceSelectedHex">#D6A45A</code>
+                </div>
+              </div>
+              <label class="appearance-channel" for="appearanceR"
+                ><span>R</span
+                ><input
+                  id="appearanceR"
+                  type="range"
+                  min="0"
+                  max="255"
+                  step="1"
+                /><b id="appearanceRValue">214</b></label
+              >
+              <label class="appearance-channel" for="appearanceG"
+                ><span>G</span
+                ><input
+                  id="appearanceG"
+                  type="range"
+                  min="0"
+                  max="255"
+                  step="1"
+                /><b id="appearanceGValue">164</b></label
+              >
+              <label class="appearance-channel" for="appearanceB"
+                ><span>B</span
+                ><input
+                  id="appearanceB"
+                  type="range"
+                  min="0"
+                  max="255"
+                  step="1"
+                /><b id="appearanceBValue">90</b></label
+              >
+              <p>拖动任意通道时页面立即变化 不需要点应用</p>
+            </div>
+            <div id="appearanceColors" class="appearance-colors"></div>
+            <div class="appearance-actions">
+              <button
+                class="secondary-btn accent"
+                id="appearanceExportBtn"
+                type="button"
+              >
+                导出界面参数
+              </button>
+              <button
+                class="secondary-btn"
+                id="appearanceImportBtn"
+                type="button"
+              >
+                导入界面参数
+              </button>
+              <button
+                class="secondary-btn"
+                id="appearanceResetBtn"
+                type="button"
+              >
+                恢复当前主题默认配色
+              </button>
+            </div>
+            <input
+              id="appearanceImportFile"
+              type="file"
+              accept=".json,application/json"
+              hidden
+            />
+          </section>
+        </div>
+      </aside>
+    </div>
+
+    <div id="painterOverlay" class="overlay" hidden>
+      <div class="painter-window">
+        <div class="painter-head">
+          <div>
+            <strong>RenderDragon 纹理与材质编辑器</strong>
+            <span>纹理资源 · 像素画布 · PBR 通道</span>
+          </div>
+          <button class="cmd" id="closePainterBtn" type="button">
+            关闭画板
+          </button>
+        </div>
+        <iframe
+          id="painterFrame"
+          title="RenderDragon 纹理与材质编辑器"
+        ></iframe>
+      </div>
+    </div>
+
+    <div id="modal" class="modal" hidden>
+      <div
+        class="modal-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <h2 id="modalTitle"></h2>
+        <p id="modalText"></p>
+        <div id="modalField" class="modal-field" hidden>
+          <label id="modalInputLabel" for="modalInput">名称</label>
+          <input
+            id="modalInput"
+            class="modal-input"
+            type="text"
+            autocomplete="off"
+            aria-describedby="modalInputHelp modalInputError"
+          />
+          <div id="modalInputHelp" class="modal-help"></div>
+          <div
+            id="modalInputError"
+            class="modal-error"
+            role="alert"
+            hidden
+          ></div>
+        </div>
+        <div id="modalProgress" class="progress-block" hidden>
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+          <span id="progressText"></span>
+        </div>
+        <div class="modal-actions">
+          <button class="cmd" id="modalCancel" type="button">取消</button>
+          <button class="cmd primary" id="modalOk" type="button">确定</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+    <script src="assets/seed-data.js?v=1.0.0"></script>
+    <script src="assets/template-bundle.js?v=1.0.0"></script>
+    <script src="assets/color-contract.js?v=1.0.0"></script>
+    <script src="assets/color-picker.js?v=1.0.0"></script>
+    <script src="assets/renderdragon-schema.js?v=1.0.0"></script>
+    <script src="assets/fs-core.js?v=1.0.0"></script>
+    <script src="assets/pbr-registry.js?v=1.0.0"></script>
+    <script src="assets/workspace-io.js?v=1.0.0"></script>
+    <script src="assets/pbr-algorithm.js?v=1.0.0"></script>
+    <script src="assets/png-codec.js?v=1.0.0"></script>
+    <script src="assets/mers-codec.js?v=1.0.0"></script>
+    <script src="assets/texture-targets.js?v=1.0.0"></script>
+    <script src="assets/material-bridge.js?v=1.0.0"></script>
+    <script src="assets/ui-layout.js?v=1.0.0"></script>
+    <script src="assets/painter-doc.js?v=1.0.0"></script>
+    <script src="assets/app.js?v=1.0.0"></script>
+  </body>
+</html>

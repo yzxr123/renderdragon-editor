@@ -1,0 +1,11 @@
+assets/template-bundle.js
+assets/painter-doc.js
+_site/
+node_modules/
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
+*.log
+.env
+.env.*

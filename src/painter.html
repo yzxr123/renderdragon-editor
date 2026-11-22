@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self' data: blob:; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'none'"
+    />
+    <title>RenderDragon 纹理与材质编辑器</title>
+
+    <link rel="stylesheet" href="painter.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="titlebar">
+        <div class="brand-cluster">
+          <div class="logo" aria-hidden="true"></div>
+          <div class="brand">
+            RenderDragon 纹理与材质编辑器<small
+              >纹理资源 · 像素画布 · PBR 通道</small
+            >
+          </div>
+        </div>
+        <div class="tb-context">
+          <label for="packPath">当前资源包</label>
+          <input
+            class="tb-path"
+            id="packPath"
+            type="text"
+            spellcheck="false"
+            value=""
+            placeholder="尚未打开资源包"
+          />
+        </div>
+        <div class="tb-actions" aria-label="PBR 工作区操作">
+          <button
+            class="tb-btn"
+            id="packDrawerBtn"
+            type="button"
+            aria-pressed="false"
+          >
+            资源包
+          </button>
+          <button class="tb-btn primary" id="browseBtn" type="button">
+            选择文件夹
+          </button>
+          <button class="tb-btn" id="openPackBtn" type="button">
+            重新打开
+          </button>
+          <button class="tb-btn" id="createPackBtn" type="button">
+            新建包
+          </button>
+          <span class="tb-divider" aria-hidden="true"></span>
+          <button class="tb-btn" id="themeBtn" type="button">明暗主题</button>
+          <button
+            class="tb-btn"
+            id="pbrLayoutEditBtn"
+            type="button"
+            aria-pressed="false"
+          >
+            调整布局
+          </button>
+          <button class="tb-btn subtle" id="pbrLayoutResetBtn" type="button">
+            布局复位
+          </button>
+        </div>
+      </header>
+
+      <div class="workspace">
+        <aside
+          class="panel pack-sidebar collapsed"
+          id="packPanel"
+          data-layout-key="pbr:pack"
+        >
+          <div class="phd">
+            <span>资源包</span>
+            <button class="pack-close" id="closePackPanelBtn" type="button">
+              收起
+            </button>
+          </div>
+          <div class="preview-wrap">
+            <div class="pack-status">
+              <strong id="capName">还没打开包</strong>
+              <em id="capPro">浏览器会记住已授权过的 RenderDragon 资源包</em>
+            </div>
+            <label class="pack-field" for="newPackName"
+              ><span>新资源包名称</span
+              ><input
+                id="newPackName"
+                class="search"
+                type="text"
+                placeholder="例如 渲染龙材质包"
+            /></label>
+            <label class="pack-field" for="packPipeline"
+              ><span>资源管线</span
+              ><select id="packPipeline" class="search">
+                <option value="renderdragon" selected>
+                  RenderDragon 纹理与光影包
+                </option>
+              </select></label
+            >
+            <button
+              class="tb-btn primary full"
+              id="createPackBtnSide"
+              type="button"
+            >
+              创建 RenderDragon 资源包
+            </button>
+            <p class="hint" id="libHint">
+              未制作 PBR 时使用普通纹理 制作 PBR 后统一使用 MERS
+            </p>
+            <div class="pack-list-head">
+              <span>本机授权记录</span><span id="libDirHint"></span>
+            </div>
+            <div class="pack-list" id="packList"></div>
+          </div>
+        </aside>
+
+        <section
+          class="pbr-editor"
+          id="pbrEditorPanel"
+          data-layout-key="pbr:editor"
+        >
+          <div class="pbr-contextbar">
+            <strong id="paintPhdLab">PBR 纹理编辑器</strong>
+            <span id="phdLive"
+              >打开资源包后 左边选纹理 中间绘制 右边调材质</span
+            >
+          </div>
+          <div class="preview-wrap">
+            <div id="paintSurface" class="paint-surface">
+              <div id="paintTopBar" class="paint-topbar"></div>
+              <div id="paintSplit" class="paint-split">
+                <aside
+                  id="paintTexturePane"
+                  class="paint-texture-pane"
+                  data-layout-key="pbr:textures"
+                >
+                  <div class="paint-pane-heading">
+                    <b>纹理资源</b><span>中文 · 英文 · 路径</span>
+                  </div>
+                  <div
+                    id="paintTextureBrowserHost"
+                    class="paint-texture-browser-host"
+                  ></div>
+                </aside>
+                <div
+                  id="paintDock"
+                  class="paint-dock"
+                  data-layout-key="pbr:canvas"
+                ></div>
+                <aside
+                  id="paintStudioHost"
+                  class="paint-tools-pane"
+                  data-layout-key="pbr:tools"
+                ></aside>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="toast" id="toast">已复制</div>
+
+    <script src="../assets/color-contract.js"></script>
+    <script src="../assets/color-picker.js"></script>
+    <script src="painter.js"></script>
+    <script src="painter-shell.js"></script>
+  </body>
+</html>

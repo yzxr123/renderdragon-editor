@@ -1,0 +1,17 @@
+name: Bug report
+description: Report a reproducible editor problem
+title: "[Bug] "
+body:
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+      description: Browser version, import type, and steps. Do not attach private packs.
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: Expected and actual behavior
+    validations:
+      required: true
